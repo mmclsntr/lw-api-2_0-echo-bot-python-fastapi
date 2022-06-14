@@ -1,4 +1,4 @@
-# LINE WORKS API 2.0 Echo bot Sample - Python Fast API
+# LINE WORKS API 2.0 Echo bot Sample - Python FastAPI
 Sample code for LINE WORKS API 2.0 bot
 
 ## Description
@@ -39,7 +39,7 @@ docker compose up -d --build
 
 ## Contribution
 
-1. Fork ([https://github.com/mmclsntr/lw-bot-2_0-echo-python-fastapi](https://github.com/mmclsntr/lw-bot-2_0-echo-python-fastapi))
+1. Fork ([https://github.com/mmclsntr/lw-api-2_0-echo-bot-python-fastapi](https://github.com/mmclsntr/lw-api-2_0-echo-bot-python-fastapi))
 1. Create a feature branch
 1. Commit your changes
 1. Rebase your local changes against the master branch
