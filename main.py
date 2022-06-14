@@ -28,8 +28,9 @@ handler.setLevel(INFO)
 logger.addHandler(handler)
 logger.setLevel(INFO)
 
+
 @app.post("/callback")
-async def chat_2_0(request: Request):
+async def callback(request: Request):
     body_raw = await request.body()
     body_json = await request.json()
     headers = CaseInsensitiveDict(request.headers)
@@ -48,7 +49,7 @@ async def chat_2_0(request: Request):
     service_account_id = os.environ.get("LW_API_SERVICE_ACCOUNT")
     privatekey = os.environ.get("LW_API_PRIVATEKEY")
 
-    # validation
+    # Validation
     signature = headers.get("x-works-signature")
     if not lineworks.validate_request(body_raw, signature, bot_secret):
         logger.warn("Invalid request")
@@ -57,6 +58,7 @@ async def chat_2_0(request: Request):
     user_id = body_json["source"]["userId"]
     content = body_json["content"]
 
+    # Create response content
     if content["type"] == "text":
         txt = content["text"]
         res_content = {
@@ -65,7 +67,6 @@ async def chat_2_0(request: Request):
                 "text": txt
             }
         }
-
     else:
         res_content = {
             "content": {
@@ -88,17 +89,17 @@ async def chat_2_0(request: Request):
     logger.info(res_content)
     for i in range(RETRY_COUNT_MAX):
         try:
-            # Reply
+            # Reply message
             res = lineworks.send_message_to_user(res_content,
                                                  bot_id,
                                                  user_id,
                                                  global_data["access_token"])
         except RequestException as e:
-            print(e.__dict__)
             body = e.response.json()
             status_code = e.response.status_code
             if status_code == 403:
                 if body["code"] == "UNAUTHORIZED":
+                    # Access Token has been expired.
                     # Update Access Token
                     logger.info("Update access token")
                     res = lineworks.get_access_token(client_id,
@@ -111,13 +112,14 @@ async def chat_2_0(request: Request):
                     logger.exception(e)
                     break
             elif status_code == 429:
-                # Over rate limit
+                # Requests over rate limit.
                 logger.info("Over rate limit")
                 logger.info(body)
             else:
                 logger.exception(e)
                 break
 
+            # wait and retry
             time.sleep(2 ** i)
         else:
             break
