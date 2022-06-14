@@ -1,0 +1,16 @@
+version: "3.0"
+
+services:
+  callback:
+    build: .
+    restart: always
+    tty: true
+    environment:
+      - LW_API_BOT_ID
+      - LW_API_BOT_SECRET
+      - LW_API_CLIENT_ID
+      - LW_API_CLIENT_SECRET
+      - LW_API_SERVICE_ACCOUNT
+      - LW_API_PRIVATEKEY
+    ports:
+      - 8000:8000
