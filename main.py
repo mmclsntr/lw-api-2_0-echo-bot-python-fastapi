@@ -58,6 +58,11 @@ async def callback(request: Request):
     user_id = body_json["source"]["userId"]
     content = body_json["content"]
 
+    # Create response content
+    res_content = {
+        "content": content
+    }
+
     if "access_token" not in global_data:
         # Get Access Token
         logger.info("Get access token")
@@ -69,11 +74,11 @@ async def callback(request: Request):
         global_data["access_token"] = res["access_token"]
 
     logger.info("reply")
-    logger.info(content)
+    logger.info(res_content)
     for i in range(RETRY_COUNT_MAX):
         try:
             # Reply message
-            res = lineworks.send_message_to_user(content,
+            res = lineworks.send_message_to_user(res_content,
                                                  bot_id,
                                                  user_id,
                                                  global_data["access_token"])
