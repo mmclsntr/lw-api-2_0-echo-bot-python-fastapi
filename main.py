@@ -38,42 +38,25 @@ async def callback(request: Request):
     logger.info(body_json)
     logger.info(headers)
 
-    bot_id = headers.get("x-works-botid")
-    signature = headers.get("x-works-signature")
+    header_bot_id = headers.get("x-works-botid", "dummy")
+    signature = headers.get("x-works-signature", "dummy")
 
     # Load parameters
-    bot_id = os.environ.get("LW_API_BOT_ID")
-    bot_secret = os.environ.get("LW_API_BOT_SECRET")
-    client_id = os.environ.get("LW_API_CLIENT_ID")
-    client_secret = os.environ.get("LW_API_CLIENT_SECRET")
-    service_account_id = os.environ.get("LW_API_SERVICE_ACCOUNT")
-    privatekey = os.environ.get("LW_API_PRIVATEKEY")
+    bot_id = os.environ.get("LW_API_BOT_ID", "dummy")
+    bot_secret = os.environ.get("LW_API_BOT_SECRET", "dummy")
+    client_id = os.environ.get("LW_API_CLIENT_ID", "dummy")
+    client_secret = os.environ.get("LW_API_CLIENT_SECRET", "dummy")
+    service_account_id = os.environ.get("LW_API_SERVICE_ACCOUNT", "dummy")
+    privatekey = os.environ.get("LW_API_PRIVATEKEY", "dummy")
 
     # Validation
     signature = headers.get("x-works-signature")
-    if not lineworks.validate_request(body_raw, signature, bot_secret):
+    if header_bot_id != bot_id or not lineworks.validate_request(body_raw, signature, bot_secret):
         logger.warn("Invalid request")
         return
 
     user_id = body_json["source"]["userId"]
     content = body_json["content"]
-
-    # Create response content
-    if content["type"] == "text":
-        txt = content["text"]
-        res_content = {
-            "content": {
-                "type": "text",
-                "text": txt
-            }
-        }
-    else:
-        res_content = {
-            "content": {
-                "type": "text",
-                "text": "Please send a text."
-            }
-        }
 
     if "access_token" not in global_data:
         # Get Access Token
@@ -86,11 +69,11 @@ async def callback(request: Request):
         global_data["access_token"] = res["access_token"]
 
     logger.info("reply")
-    logger.info(res_content)
+    logger.info(content)
     for i in range(RETRY_COUNT_MAX):
         try:
             # Reply message
-            res = lineworks.send_message_to_user(res_content,
+            res = lineworks.send_message_to_user(content,
                                                  bot_id,
                                                  user_id,
                                                  global_data["access_token"])
